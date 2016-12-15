@@ -1,0 +1,240 @@
+Memory Management 内存管理
+
+自动引用计数 swift 使用
+
+基本概念
+swift 使用的是 自动引用计数 管理对象的内存
+
+引用计数
+
+每个对象都有一个引用计数 来记录有多少人需要该对象活着
+
+当 引用计数>0时 该对象保留在内存中
+当 引用计数=0 时 该对象就从内存中销毁
+
+自动引用计数
+系统会在编译前填补引用技术的管理代码
+
+自动引用计数 不是垃圾回收机制 （垃圾回收机制 是在内存紧张时 才会释放内存 但是 自动引用计数 是 引用计数为0时 立刻被释放）
+
+
+
+
+-----------------------------
+
+Automatic Refrence Counting
+
+自动引用计数
+
+class Bottle {
+	
+}
+
+func play(count:Int)
+{
+	var left = Bottle()
+
+	if let count >1 {
+
+    var right = Bottle ()
+//这里以上代码 left 引用 bottle 对象1 right 引用 bottle 对象2
+    //在以下代码执行后 由于right 不再引用bottle2 bottle2 从内存中释放了
+
+    right = left
+//bottle1对象的引用计数 为2
+
+
+	}//当代码执行到大括号后 变量 right的作用域结束 right生命结束
+	//bottle1对象的引用计数 回归到1
+}//当代码执行到大括号这里时 left 生命周期也结束 那么对象bottle1 也释放内存了
+
+
+
+
+
+----------------------------
+内存管理
+owner Ship 所有权
+
+class Apartment {
+	
+	var person: Person?
+
+}
+/*
+这里公寓可能住有人 也可能没有
+这里人 有公寓住 也可能没有
+
+因此这两个类 的对应属性 为可选型
+
+
+
+*/
+class Person {
+
+	var home: Apartment?
+
+	func moveIn(apt:Apartment)
+	{
+
+	  self.home = apt
+
+	  apt.person = self
+	  //无论是在对象中 还是在代码块中
+	   //代码目前 没有任何声明 这里所有的指向对象的关系 都是默认的强引用
+
+
+	}
+}
+
+
+var renters = ["sun": Person()]
+
+var apts = [507 : Apartment()]
+
+//这里以上两个字典 也是强引用
+
+renters["sun"]!.moveIn(apts[507]!)
+
+renters["sun"] = nil //这里撤销字典对person对象的引用
+
+apts[507] = nil //这里无法释放 并且程序执行到这里 两个对象一直存在内存中 并且再也无法访问 或者 引用  或者释放
+
+内存泄漏 这种引用 相互引用 并且是强引用的情况 
+
+为了解决循环引用 我们需要 一个关键字 weak 
+
+-----------------
+weak 弱引用 一定是可选型 因为系统释放时 会把该值置为nil
+
+
+
+使用弱引用
+
+对可选型进行绑定时会产生一个强引用
+
+if let person = apt.person {
+	//对可选型进行绑定时会产生一个强引用 该引用计数加1
+	person.dingDong()
+	//保证if 语句块 中 访问数据 正常后 该强引用释放引用 引用计数减一
+}
+//可选值链 也会临时产生一个强引用 下一行就会 释放该引用计数
+apt.person?.dingDong()
+apt.person?.dingDong2()
+
+只检测弱引用并不会产生强引用
+
+if apt.person {
+	
+	apt.person!.leaveFromApartment()
+	apt.person!.greet()
+
+}
+
+
+
+class Apartment {
+	
+	weak var person: Person?
+
+}
+
+class Person {
+
+ 	weak var home: Apartment?
+
+	func moveIn(apt:Apartment)
+	{
+
+	  self.home = apt
+
+	  apt.person = self
+	  //无论是在对象中 还是在代码块中
+	   //代码目前 没有任何声明 这里所有的指向对象的关系 都是默认的强引用
+
+
+	}
+}
+//弱引用 只是引用对象 但是不会改变引用对象的计数
+renters["sun"]!.moveIn(apts[507]!)
+
+renters["sun"] = nil //这里撤销字典对person对象的引用 这里是弱引用
+ 
+ 虽然我们这里是 sun 对 person的引用 撤销了 但是 代码逻辑上 公寓 
+
+apts[507] = nil //这里无法释放 并且程序执行到这里 
+
+
+----------------
+
+Same-Lifetime Relationships
+同生命线的关系
+
+class Person {
+	
+	var card : CreditCard?
+
+}
+
+//这里也是相互引用 但是为了 人可以有信用卡 也可以没有信用卡
+但是 信用卡一定得有人 为了体现这一点
+我们 在 person中卡 使用 可选型 但是ka 对象中
+持有者属性 设置为常量 一旦赋值后就不希望它改变了
+
+这里为了避免循环引用 但无法使用 weak 弱引用类型 因为 let 类型
+的变量 不能置为nil
+
+class CreditCard {
+	
+  unowned	let holder: Person
+
+  //unowned 特点是 系统不会将引用计数加一 但会保证该属性一直有值
+
+	init(holder:Person)
+	{
+
+	self.holder = holder
+
+	}
+}
+
+unowned refrences
+非持有引用
+
+var customers = ["sun",Person()]
+//customers 字典保证 person 对象的 内存 存活
+
+customers['sun']!.saveCard()
+//人 持有信用卡 同时卡 非持有引用 人
+
+customers['sun'] = nil 
+//我们把人 释放 信用卡也死了 但是 死的时候 holder 还有值呢
+
+-------------
+
+强引用
+ 一般指向对象的变量都是强引用 比如 局部变量 对象属性
+
+弱引用
+ 当引用需要反向指回时 如果还使用强引用
+会产生引用回路 从而内存泄漏；
+这个时候需要选择使用弱引用或者非持有引用
+
+弱引用和 非持有 引用 都不会对 引用计数产生影响
+
+弱引用可以为空 非持有引用不可以为空
+
+一般选择弱引用 
+
+对不同声明线的对象之间的关系使用 弱引用
+
+当其中一个对象释放后 那么引用者引用变量被系统置为nil
+
+对同生命线中的反向引用使用非持有引用
+
+
+
+
+
+
+

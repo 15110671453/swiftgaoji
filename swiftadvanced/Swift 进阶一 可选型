@@ -1,0 +1,264 @@
+Swift 进阶一 可选型
+
+swift 的 可能值 可能值
+optionals 可选型
+memory management内存管理
+initialization初始化函数
+closures闭包
+pattern matching 模式匹配
+
+
+String to Integer
+字符串到整型的转换
+
+请输入您的年龄
+用户可能输入 25  或 其他非数字字符串
+ 
+ 以前为避免用户输入内容的过滤
+
+ OC 会自己写方法 来用NULL nil 或其他自定义
+ 值 来表达没有想要的输出结果
+
+ 在swift中 
+
+ Optional Type 为解决这一问题诞生
+-----------------------------------------
+第一：声明变量
+
+ 声明一个变量 可选型 类型
+ var optionalNumber : Int?
+
+ 在OC中用nil 表达所指的指针 没有值 只用于表达指针对象没有值用nil
+
+------------------------------------------
+第二： 变量赋值
+
+ optionalNumber = 6 可能值类型变量 有两个值 第一个值是nil 第二个值是6 值
+
+ 因此并不是optionalNumber值是6 其实它是一个包 包里永远有两个值
+
+ 第一个值是nil 第二个值是6；
+----------------------------------------
+one sentinel to rule them all
+第二 引用变量值
+ 要使用
+
+ let age = response.toInt();
+
+
+ -----------------------------
+非可选型类型
+Non-Optional Types
+非可能值类型 不能为nil
+
+var myString:String = "sssssstring"
+
+var myObject: MyClass = nil
+
+不加问号为非可能值类型 不能设置为nil 否则编译时报错
+-------------------------------------
+
+
+func findIndexOfString(string:String,array:String[])->Int?
+{
+	//第一个为要查找的目标字符串 第二个参数要查找的字符串数组
+	//这里为了表达我们该函数方法在查找字符串时可能找不到值，因此，返回值类型为可选型
+
+
+	for (index,value) in enumerate(array)
+	{
+
+	//遍历数组 使用系统提供的方法enumerate 返回一个元组tuple
+	if value == string 
+	{
+		//这里虽然返回的是index 但实际是抱着索引值的可选型
+	   return index
+
+	}
+
+
+	}
+
+	return nil
+
+}
+
+------------------
+Unwrapping Optionals
+可能值拆包
+
+var celebrities = ["sun","moto"]
+
+let index : Int? = findIndexOfString("android",celebrities)
+
+if index {
+	//这里判断 index 是否是nil 如果是不是nil
+	//但是我们返回的index是可选型 这里的数组要传入的参数是非可选值类型 是Int类型
+	//因此编译器提示 类型不匹配错误 因此我们要加!强制解包
+	//但是要注意的是 为了强制拆包时真的有数据 前面一定要在强制拆包前检测 该可选型有值
+	println("\(celebrities[index]),你好")
+
+} else {
+	
+  println("没辙人")
+}
+
+--------------------
+拆包技术 方便拆包 第一  可能值绑定 optional Binding
+
+检测的同时解包
+if let indexValue = index 
+{
+ //这里的indexValue就是一般的Int类型 而不是Int可选型 可以直接使用了
+	
+	println("\(celebrities[indexValue]),你好")
+
+} else
+{
+	
+	 println("没辙人")
+}
+
+if let indexValue = findIndexOfString("android",celebrities) 
+{
+ //这里的indexValue就是一般的Int类型 而不是Int可选型 可以直接使用了
+	
+	println("\(celebrities[indexValue]),你好")
+
+} else
+{
+	
+	 println("没辙人")
+}
+
+
+---------------------------
+
+Optional Binding
+
+class Person 
+{
+	
+	var residence: Residence ?
+}
+class Residence {
+	
+	var address: Address?
+}
+class Address
+{
+	
+	var buidingNumber: String?
+	var streetNumber: String?
+	var apartmentNumber: String?
+
+
+}
+
+let alex = Person()
+
+let residence = Residence()
+
+alex.residence = residence 
+
+let address = Address()
+
+address.buildingNumber = "25"
+
+address.streetNumber = "---"
+
+
+residence.address = address 
+
+
+vat addressNumber : Int?
+
+if let residence = alex.residence {
+	
+	if let address = residence.address
+	{
+		if let buildingNumber = address.buildingNumber
+		{
+
+
+		   if let convertedNumber = buildingNumber.parseToInt()
+		   {
+
+		   	addressNumber =  convertedNumber
+
+		   }
+		}
+
+	}
+}
+
+
+可选值链
+optional chaining
+
+//在类型后加问号 代表可选值类型 在变量名后加问号 代表我要去查
+addressNumber = alex.residence?.address?.buildingNumber?.toInt()
+
+//alex 为非可选型 肯定有值 再检测 residence 如果residence 没值直接就返回nil 后面的可选型检测就不执行了
+
+
+----------------------------------------------------
+注意 开发中  ：
+使用可能值绑定 optionalBinding 与 optionalChaining 结合使用
+
+
+if let addressNumber = alex.residence?.address?.buildingNumber?.toInt()
+
+{
+	
+
+
+}
+
+----------------------
+Optional Under the Hood
+
+可能值内部结构 范型
+
+enum Optional <T> 
+{
+	case None
+
+	case Some(T)
+}
+
+--------
+使用可能值技术 可以安全的操作一些可能没有值的变量
+如果没有值 就是nil
+如果有值 这个值 被包在可能值中 （可选型）
+
+------‘对可选型拆包时  一定要检测if 确认有值 再强制拆包
+
+如果要检测的同时 解包 就需要使用 可选型绑定技术
+if let 可选值绑定技术 
+
+-------
+java语言 空异常 oc 崩溃 
+
+对于一般类型非可选型 是不能赋值为nil的
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

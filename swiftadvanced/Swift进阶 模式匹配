@@ -1,0 +1,273 @@
+Swift进阶 模式匹配
+A系列课程
+模式匹配 模式组合 类型模式匹配 元组模式匹配
+
+
+
+Pattern Match
+模式匹配
+
+
+
+Switch 语句  swift中 switch 语句 相当强大
+
+不同于 其他语言
+
+switch 语句 
+case 整型  
+case 字符串
+case 区间
+
+func describe(value:Int)
+{
+	
+	swith value {
+
+	case "1":{
+
+	}
+	case "2"
+	{
+
+	}
+
+
+	}
+
+
+
+
+
+}
+
+Enumerations
+
+枚举
+
+enum TrainStatus
+{
+	
+	case OnTime
+
+	case Delayed(Int)
+
+}
+
+switch 语句这里就是使用 模式匹配
+switch trainStatus {
+	
+	case .OnTime :
+
+	println("准时")
+/*这里的匹配 是 逐级进行匹配的*/
+	case .Delayed(let minutes):
+
+	println("延误\(minutes)分钟")
+
+}
+	println("咱溜达\(minutes)分钟")
+error use of unresolved identifier 'minutes'
+
+
+
+Patterns Compose 
+
+从模式匹配 到 
+
+ 模式组合
+
+
+
+switch trainStatus {
+	
+	case .OnTime :
+
+	println("准时")
+/*这里的匹配 是 逐级进行匹配的*/
+	case .Delayed(1):
+
+	println("还是准时的")
+
+	case .Delayed(2...10):
+
+	println("在合理浮动范围内")
+
+	case .Delayed(_):
+
+	println("在合理浮动范围内")
+
+
+
+}
+
+
+
+
+enum  VacationStatus {
+	
+	case Traveling (TrainStatus)
+
+	case Relaxing(daysLeft:Int)
+
+
+}
+
+
+switch vacationStatus {
+	
+	case .Traveling(.OnTime):
+	weibo("准时出发 好开心")
+	case .Traveling(.Delayed(1...15)):
+	weibo ("延误了")
+	case .Traveling(.Delayed(_)):
+	weibo ("退票")
+}
+
+
+Type Patterns
+类型模式匹配
+
+func tuneUp(car:Car)
+{
+	
+
+  switch car {
+
+   case let formulaOne as FormulaOne:
+   formulaOne.enterPit()
+
+   case let raceCar as RaceCar
+
+   if raceCar.hasTurbo{ raceCar.tuneTurbo()}
+   fallthrough
+
+   default:
+         car.checkOil()
+
+
+  }
+
+
+}
+
+
+Tuple Patterns
+  元组模式的匹配
+
+
+  let color = (1.0,1.0,1.0,1.0)
+
+  switch color {
+
+  case (0.0,0.5...1.0,let blue,_)
+
+  println ("Green and \(blue * 100) % blue")
+
+/*元组匹配  第一个值 只接受 0.0 的匹配
+
+第二个值 匹配 0.5到1.0之间
+
+第三个值 绑定到 参数变量 blue 以方便以后使用 ，第四个透明度 可以接受任何值
+*/
+
+
+	case let (r,g,b,1.0) where r == g && g == b
+
+	println("Opaque gray 不透明的灰")
+
+  }
+
+
+-------------------
+
+validating a property list
+验证一个Plist
+
+Putting Patterns Together
+模式匹配混合应用
+
+func stateFromPlist(list:Dictionary<String,AnyObject>)->State?
+{
+	
+    var name: NSString ?
+    switch list["name"]{
+    case .Some(let listName as NSString):
+    name = listName
+
+    default:
+    name = nil
+
+
+
+    }
+
+    return name
+
+
+}
+
+stateFromPlist(["name":"北京","population":2100_0000,"addr":"京"])
+
+
+
+func stateFromPlist(list:Dictionary<String,AnyObject>)->State?
+{
+	
+    var name: NSString ?
+    switch （list["name"],list["population"],list["addr"]）{
+    case .Some(let listName as NSString,let population as NSNumber,let addr as NSString) where addr.length == 1:
+
+    return State(name:listName,population:population,addr:addr)
+
+    default:
+    
+    return nil
+
+
+
+    }
+
+
+}
+/////////////////
+
+Pattern Matching
+
+模式匹配
+
+结构化验证值是否符合要求
+
+
+增强可读性 - 模式匹配让验证代码变得简洁而且可以相互组合
+
+增强安全性 - 在对应条件满足时才进行值绑定
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

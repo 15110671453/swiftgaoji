@@ -1,0 +1,375 @@
+swift进阶 初始化原则
+
+初始化原则 便捷初始化
+
+initialization
+初始化
+swift 与 OC 略不同
+一般在
+在OC中 初始化  是类在构建对象时 进行 初始化
+但在 swift 中 
+变量 赋初始值时 就是初始化
+结构体  
+对象 都有初始化
+
+every value must be
+initialized 
+before it is used
+
+---------------
+
+var message:String
+在swift 中 这里 没有给该变量赋 初值 ，系统不会有任何的默认值
+唯一特殊情况 就是可选值类型  如果不赋初值 则有默认值nil
+
+这里没有初始化 
+
+-----
+var message:String
+
+if sessionStarted {
+	
+	message = "chushihua"
+}
+
+println(message)
+//编译器依旧报错 为什么 message used before uninitialized
+因为 以上代码 还有未初始化的情况 需要加else语句
+
+var message:String
+
+if sessionStarted {
+	
+	message = "chushihua"
+}else
+{
+	
+	message = "所有代码支路保证变量使用前初始化"
+}
+
+println(message)
+
+
+-----------------------
+初始化方法 构造方法
+initializers
+
+initializers handle the responsibility
+of fully initializing an instance
+初始化方法应该将一个实例彻底初始化
+
+// 初始化方法  无参
+
+init(){...}
+
+init(luckyNumber:Int,message:String){...}
+
+let instance = MyClass(luckyNumber:24, message:"Not today")
+
+
+------
+
+structure initialization
+结构体初始化
+
+struct Color
+{
+	let red , green,blue:Double
+	init(grayScale:Double) {
+
+	green = grayScale
+
+	red = grayScale
+//self used before being initialized 方法写在这里报错
+	validateColor()
+
+	blue = graySale
+
+
+    validateColor()
+
+
+
+	}
+
+}
+-------------
+Memberwise Initializers
+成员初始化方法
+struct Color
+{
+	
+	let red , green,blue :Double
+
+//如果没有写任何初始化方法  系统会帮助生成一个 初始化方法
+ 
+ 成员初始化函数
+}
+
+let magenta = Color(red:1.0,green:1.0,blue:1.0)
+
+
+-----------
+
+结构体  无参初始化 
+
+Default Value
+
+//这里定义一个 结构体 结构体 中属性 并且赋值了默认值
+一旦储值属性都赋值了初始值 系统 就会生成一个 无参的初始化方法 
+因为它不再需要传任何参数 帮这个结构体 
+struct Color {
+	
+	let red = 0.0 ,green = 0.0 , blue = 0.0
+
+}
+
+
+--------------------------
+以上是对结构体的初始化 
+以下研究类的初始化 对象初始化
+Class Initialization
+
+Class Car {
+	
+var paintColor : Color
+
+func fillGasTank(){...}
+
+init(color:Color)
+{
+	
+	paintColor = color
+}
+
+}
+//一般类的初始化 与 结构体初始化 类似 
+
+但是 类 需要考虑 继承的问题  但是结构体 不需要
+
+Class RaceCar: Car {
+	
+	var hasTurbo:Bool
+
+	override func fillGasTank(){
+	.....
+	//覆盖 父类方法 多态的问题
+
+	}
+	init(color:Color,turbo:Bool)
+	{
+		hasTurbo = turbo
+
+		super.init(color:color)
+
+	}
+
+}
+/*一般语言中 super init 方法 应该先执行
+但是 swift 中 却是在 最后调用
+避免 swift 中 一些问题  在继承时 要把super 写在最后
+*/
+
+
+
+------------------------
+initializer delegation
+初始化方法内调
+
+Base Class 基类
+Designated3 主方法
+
+
+
+Super Class 
+
+ convenience-->  Designated2 主方法
+
+
+Class
+
+Designated1 主方法  Designated 主方法
+
+
+
+---------------------------
+
+Class RaceCar: Car {
+	
+	var hasTurbo:Bool
+
+	override func fillGasTank(){
+	.....
+	//覆盖 父类方法 多态的问题
+
+	}
+
+	init(color:Color,turbo:Bool)
+	{
+		hasTurbo = turbo
+
+		super.init(color:color)
+	//因为这里调用了super init 因此是 主方法
+
+	}
+
+	convenience init(color:Color)
+	{
+//假如 我们知道 跑车一定有涡轮 我们写一个便捷方法
+
+    self.init(color:color,turbo:true)
+
+    //因为这里没有 super 因此是便捷的 
+    //同时 为了证明这一点 需要 添加关键字 convinience
+
+
+
+	}
+   //同样也可以有多个 便捷方法 这里加一个无参的
+	convenience init ()
+	{
+		self.init(color:Color(gray:4.0))
+	}
+
+}
+
+////
+初始化方法的继承
+initializer Inheritance
+
+class FormulaOne : RaceCar {
+	
+
+	let  minimumWeight = 642
+
+  /*一旦子类 这里 写了初始化方法 那么
+  父类 多余的那些 便捷方法 就不会继承过来了
+  */
+
+  init(color:Color)
+  {
+
+
+
+  super.init(color:color,turbo:false)
+
+
+
+  }
+
+
+
+
+
+
+
+}
+
+//////
+
+
+
+Lazy Properties
+
+延缓加载属性
+
+
+Class Game {
+	
+  	@lazy	var multiplayerManager = MultiplayerManager()
+
+ 	var singlePlayer: Player?
+
+ 	func beginGameWithPlayers(players:Player...)
+ 	{
+
+ if players.count == 1 {
+
+ singlePlayer = players[0]
+  
+  } else {
+
+   for player in players {
+ 	
+ 	multiplayerManager.addPlayer(player)
+
+   }
+
+
+  }
+
+
+ }
+
+
+}
+
+/////
+Deinitialization
+反初始化 析构
+
+class FileHandle {
+	
+  let fileDescriptor:FileDescriptor
+
+  init(path:String)
+  {
+
+  	fileDescriptor = openFile(path)
+
+  }
+
+  deinit()
+  {
+
+  //虽然 swift 帮助我们管理内存 自动引用计数
+  //我们在这里 关掉 网络 关掉文件
+   closeFile(fileDescriptor)
+
+  }
+
+}
+
+--------------
+initialization
+初始化
+
+所有的值 在使用之前 都需要初始化
+
+初始化方法 对 结构体 对象 初始化 需要对储值属性 都初始化
+
+对于对象 先将本类的储值属性 再调用父类的初始化方法
+
+便捷初始化方法 convennience 只能 平行调用 类内 调用
+
+支持反初始化 如果需要的可以使用
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

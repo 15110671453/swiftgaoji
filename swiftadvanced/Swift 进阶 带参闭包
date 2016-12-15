@@ -1,0 +1,312 @@
+Swift 进阶 带参闭包
+
+带参闭包 
+
+隐式
+
+函数式编程
+
+捕获 
+
+闭包内存管理
+
+
+----------------------------
+闭包基础知识 前往 swift 入门
+
+
+var clients = ["AnZhuo","SanSang","MoTuo","ChuangHu"]
+
+clients.sort({(a:String,b:String)->Bool in
+	
+	return a < b
+
+	//
+	return countElements(a) < countElements(b)
+})
+
+println(clients)
+
+-------------------
+
+闭包 
+
+
+
+sort 方法
+-----------------
+自动类型推导
+Type Inference
+
+struct Array<T>
+{
+	func sort(order:(T,T)->Bool)
+}
+----------
+
+struct Array<String>
+{
+	func sort(order:(String,String)->Bool)
+}
+//隐式写法1 
+clients.sort({
+	
+a,b in return a < b
+
+})
+///隐式写法2 因为 闭包 代码体 只有一行代码 return 也可以省略
+clients.sort({
+	
+a,b in  a < b
+
+})
+
+
+//Implicit Arguments
+隐式参数 $0  通过数字 加 $符 来表示 要使用 那个参数 第几个参数
+
+clients.sort({ $0 < $1 })
+
+//Functional Programmer
+
+函数式编程  与 面向对象 平级  新 概念
+
+println(words.filter { $0.hasSuffix("gry")})
+
+println(words.map { $0.uppercaseString} )
+
+println(words.reduce("HULK") {"\($0) \($1)"} )
+   
+println( "GRR!" + words.reduce("HULK") {"\($0) \($1)"} )
+
+
+Captures
+捕获
+ 
+ func sum(numbers:Int[])
+ {
+
+ 	var sum = 0
+
+ 	numbers.map {
+ 		/*闭包 中 这里的sum 堆栈 结构 并不属于 闭包
+ 		属于闭包外 该怎么分析
+
+ 		闭包处理时  捕获 sum 的引用 传过来 不是复制
+ 		这里也就是 说 就是同一个 sum
+
+ 		注意OC 的不同
+ 		OC 中 block 处理的不同 
+ 		OC 中 block 会将 外面的堆栈结构都复制
+
+ 		因此 也不需要 添加 下划线block 来标注 block 引用
+ 		*/
+
+
+ 		sum += $0
+ 	}
+
+ 	return sum 
+ 	//这就表明 sum 在swift 中是 引用到了 不同OC
+
+ }
+
+Function Values ----Methods
+/*
+这里 闭包 既能接受闭包 又能 接受方法
+
+*/
+函数量 - 方法
+
+var indexes = NSMutableIndexSet()
+
+numbers.map(indexes.addIndex)
+
+numbers.map{indexes.addIndex($0)}
+
+---------------------------------
+closures are arc objects
+闭包其实是arc对象
+
+//声明 一个 函数量 类型的 变量
+
+var onTemperatureChange:(Int) -> Void = {}
+
+
+func logTemperatureDifferences(initial:Int)
+{
+	
+	var prev = initial
+	//这里 真正 给这个函数量 变量 初始化
+	onTemperatureChange = { next in
+
+	println("Changed \(next - prev) F")
+	
+	prev = next
+
+	}
+
+}
+//这个 函数式变量 强引用 将函数执行完毕 后 prev 存活下来
+
+没有从内存释放吗 ？
+
+
+var onTemperatureChange:(Int) -> Void = {}
+
+func logTemperatureDifferences(initial:Int)
+{
+	
+	var prev = initial
+	//这里 真正 给这个函数量 变量 初始化
+
+	func log(next:Int)
+	{
+
+	println("Changed \(next - prev) F")
+	
+	prev = next
+
+	}
+
+	onTemperatureChange = log
+
+}
+
+/*因为 函数 闭包 会牵扯到 存活的问题 我们需要考虑 所有权的问题
+
+和 引用 回路的问题
+*/
+
+
+
+--------------
+Ownership of Captures
+捕获所有权
+
+
+class TemperatureNotifier {
+	
+	var onChange :(Int) -> Void = {}
+
+
+
+	var currentTemp = 72
+
+	init(){
+
+	  unowned let uSelf = self
+
+		onChange = {
+		
+		temp in
+
+		uSelf.currentTemp = temp
+
+		}
+
+	}
+
+
+
+}
+
+class TemperatureNotifier {
+	
+	var onChange :(Int) -> Void = {}
+
+
+
+	var currentTemp = 72
+
+	init(){
+
+	  
+
+		onChange = { [unowned self]
+		
+		temp in
+
+		self.currentTemp = temp
+
+		}
+
+	}
+
+
+
+}
+
+----------
+
+闭包
+
+就是将一段代码 或者 业务逻辑 包装起来
+
+用于在别的地方调用
+
+
+类型推导 隐式语法 依附式语法 可以
+让闭包显得更加轻巧简洁
+
+
+
+闭包支持函数式编程
+
+函数和闭包几乎等价 闭包相当于没有名字的函数
+
+
+闭包会捕获在闭包外相关变量／常量用于在闭包内处理
+
+
+如果闭包内会对捕获量进行修改操作
+ 
+ 有写入 捕获 相当于 传递了 该变量的引用
+
+
+ 如果闭包内不对捕获量 进行修改操作
+
+ 只读取 捕获相当于 复制了 该变量／常量
+
+
+ 函数和闭包 都是 ARC 对象
+
+ 受 ARC 内存管理
+
+
+ 类内方法内嵌闭包时  小心引用回路
+ 发生引用回路时 捕获列表 修改反向引用的内存管理方式
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

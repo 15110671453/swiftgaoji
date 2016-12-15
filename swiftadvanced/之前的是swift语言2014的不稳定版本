@@ -1,0 +1,108 @@
+之前的是swift语言2014的不稳定版本
+
+swift 进阶 20140818 修补布丁
+
+
+Forced  Unwrapping
+
+强制拆包
+
+var celebrities = ["sun","moto"]
+
+
+let index = findIndexOfString("andriod",celebrities)
+
+不能直接
+if index {
+	
+} else {
+	
+}
+修改为
+if index != nil {
+	
+
+} else {
+	
+
+}
+------------------------------
+Optional Chaining
+
+可能值链 以前 只能用于 取值
+
+现在 也可以用于 赋值
+
+addressNumber = alex.residence?.address?.buildingNumber?.toInt()
+
+addressNumber = alex.residence?.address?.buildingNumber = 2025
+
+--------------------------------
+增加??运算符
+
+var c = a ?? b
+
+c = a != nil ? a! :b
+
+如果 a 没有值 那么c 就等于 a 拆包后的值
+如果a 没值 就使用b的值
+
+三木运算符 左边为可选型 右边是一般性
+‘
+-----------------------------
+初始化方法 继承
+
+initializers
+
+类的方法
+
+子类只要 涉及到 覆盖 都要添加关键字
+
+override 
+
+override convenience 
+
+初始化方法的方法必须要添加override 关键字
+
+
+Required Intializers
+
+required 修饰初始化方法
+
+初始化方法前 添加required 关键字
+用于表明 子类 必须 覆盖这个初始化方法
+子类 在覆盖这个初始化方法时 无需写override
+写required 这也就意味着 后面的子类 也必须 强制覆盖 重写
+
+
+-------------------------
+延缓加载属性
+
+@lazy  @optional @final @required
+
+
+
+改为  都取消@符号
+
+lazy  optional  final  required 关键字
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
